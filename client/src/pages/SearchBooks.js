@@ -5,6 +5,7 @@ import Auth from '../utils/auth';
 import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 import { SAVE_BOOK } from '../utils/mutations';
+import { GET_ME } from '../utils/queries';
 import { useMutation } from '@apollo/client'
 
 const SearchBooks = () => {
@@ -68,9 +69,11 @@ const SearchBooks = () => {
 
     try {
       const response = await saveBook({
-        variables: {
-          input: bookToSave,
-        },
+        variables: {book: bookToSave},
+        update: cache => {
+          const { me } = cache.readQuery({ query: GET_ME });
+          cache.writeQuery({ query: GET_ME , data: {me: { ...me, savedBooks: [...me.savedBooks, bookToSave] } } })
+        }
           //  token);
       });
 
